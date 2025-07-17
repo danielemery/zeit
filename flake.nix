@@ -41,5 +41,33 @@
             buildInputs = with pkgs; [ go gopls gotools go-tools ];
           };
         });
+
+      nixosModules = {
+        default = { config, lib, pkgs, ... }: {
+          options.programs.zeit = {
+            enable = lib.mkEnableOption "zeit";
+            
+            package = lib.mkOption {
+              type = lib.types.package;
+              description = "The zeit package to use.";
+            };
+
+            database = lib.mkOption {
+              type = lib.types.str;
+              default = "/var/lib/zeit/zeit.db";
+              description = "The location of the zeit database.";
+            };
+          };
+
+          config = lib.mkIf config.programs.zeit.enable {
+            environment.systemPackages = [ 
+              (pkgs.writeShellScriptBin "zeit" ''
+                export ZEIT_DB="${config.programs.zeit.database}"
+                exec ${config.programs.zeit.package}/bin/zeit "$@"
+              '')
+            ];
+          };
+        };
+      };
     };
 }
