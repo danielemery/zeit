@@ -19,3 +19,6 @@
 /db.demo
 /charts.txt
 .DS_Store
+
+# Local nix build results
+result
